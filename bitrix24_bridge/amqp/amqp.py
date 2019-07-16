@@ -127,13 +127,13 @@ class RabbitMQConsumer(MessageConsumer):
     user: str = field(default_factory=get_var('BB_RABBITMQ_USER'))
     password: str = field(default_factory=get_var('BB_RABBITMQ_PASS'))
 
-    queue: str = field(default_factory=get_var('BB_RABBITMQ_SEND_MESSAGE_QUEUE'))
+    queue: str = field(default_factory=get_var('BB_RABBITMQ_MESSAGE_QUEUE'))
     routing_key: str = field(default_factory=get_var('BB_RABBITMQ_ROUTING_KEY'))
     exchange: str = field(default_factory=get_var('BB_RABBITMQ_EXCHANGE'))
     exchange_type: str = field(default_factory=get_var('BB_RABBITMQ_EXCHANGE_TYPE'))
     exchange_durable: str = field(default_factory=get_var('BB_RABBITMQ_EXCHANGE_DURABLE'))
 
-    connection: Optional[pika.BlockingConnection] = field(init=False, repr=False, compare=False)
+    connection: Optional[pika.BlockingConnection] = None
 
     buffer: List = field(init=False, repr=False, compare=False, default_factory=list)
 

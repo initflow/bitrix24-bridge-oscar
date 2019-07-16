@@ -1,14 +1,12 @@
 from pprint import pprint
 from typing import Dict, List
 
-
-from ..models import ProductSectionBX24
-from .base import BaseModelHandler
+from bitrix24_bridge.handlers.base import BaseModelHandler
+from bitrix24_bridge.models import ProductSectionBX
 
 
 class ProductSectionHandler(BaseModelHandler):
-
-    model = ProductSectionBX24
+    model = ProductSectionBX
 
     def list(self, data: Dict):
         result: List[Dict] = data.get('result')
@@ -18,7 +16,7 @@ class ProductSectionHandler(BaseModelHandler):
             return
 
         for part in result:
-            sync_obj = self.model.update_or_create_cls(part)
+            sync_obj = ProductSectionBX.update_or_create_cls(part)
             category = sync_obj.to_object()
 
     def get(self, data: Dict):
@@ -40,9 +38,9 @@ class ProductSectionHandler(BaseModelHandler):
         try:
             handler(data)
         except Exception as e:
-            pass
+            print(e)
 
-    def handle(self, data: Dict):
+    def handle(self, data: Dict, *args, **kwargs):
         """
         Main process method
         Args:
@@ -55,3 +53,6 @@ class ProductSectionHandler(BaseModelHandler):
 
         for part in result:
             self.dispatch(part)
+
+    def __call__(self, data: Dict, *args, **kwargs):
+        return self.handle(data, *args, **kwargs)
