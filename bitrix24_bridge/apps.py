@@ -5,7 +5,7 @@ from oscar.core.application import OscarConfig
 
 class BitrixConfig(OscarConfig):
     label = 'bitrix'
-    name = 'oscar.apps.bitrix'
+    name = 'bitrix24_bridge'
     verbose_name = _('Bitrix24 Bridge')
 
     namespace = 'bitrix'

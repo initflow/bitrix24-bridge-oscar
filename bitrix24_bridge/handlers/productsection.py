@@ -6,6 +6,7 @@ from bitrix24_bridge.models import ProductSectionBX
 
 
 class ProductSectionHandler(BaseModelHandler):
+
     model = ProductSectionBX
 
     def list(self, data: Dict):

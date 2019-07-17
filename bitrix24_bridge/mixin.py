@@ -16,6 +16,7 @@ class BitrixSyncMixin:
 
     methods: Iterable[str] = {'list', 'add', 'get', 'delete', 'update'}
     fields_map = None
+    reverse_fields_map = None
 
     exclude_fields: Optional[Iterable[str]] = None
     include_fields: Optional[Dict[str, str]] = None
@@ -42,7 +43,7 @@ class BitrixSyncMixin:
             bitrix_id=b_id,
             defaults={
                 o_f: data.get(b_f, getattr(self, o_f, None))
-                for b_f, o_f in self.get_map()
+                for b_f, o_f in self.get_map().items()
             }
         )
 
@@ -55,15 +56,23 @@ class BitrixSyncMixin:
             data = {}
 
         b_id = data.pop('ID', None) or data.pop('id', None)
-
-        obj, created = cls.objects.update_or_create(
-            bitrix_id=b_id,
-            defaults={
+        de = {
                 o_f: data.get(b_f)
-                for b_f, o_f in cls().get_map()
+                for b_f, o_f in cls().get_map().items()
                 if data.get(b_f) is not None
             }
-        )
+        try:
+            obj, created = cls.objects.update_or_create(
+                bitrix_id=b_id,
+                defaults={
+                    o_f: data.get(b_f)
+                    for b_f, o_f in cls().get_map().items()
+                    if data.get(b_f) is not None
+                }
+            )
+        except Exception as e:
+            print(e)
+            pass
 
         return obj
 
@@ -77,7 +86,7 @@ class BitrixSyncMixin:
             bitrix_id=b_id,
             defaults={
                 o_f: data.get(b_f, getattr(self, o_f, None))
-                for b_f, o_f in self.get_map()
+                for b_f, o_f in self.get_map().items()
             }
         )
 
@@ -106,6 +115,15 @@ class BitrixSyncMixin:
             },
             **include
         }
+
+    def get_reverse_map(self) -> Dict[str, str]:
+        if self.reverse_fields_map is None:
+            self.reverse_fields_map = {
+                v: k
+                for k, v in self.get_map().items()
+            }
+
+        return self.reverse_fields_map
 
     def get_map(self) -> Dict[str, str]:
         if self.fields_map is None:
