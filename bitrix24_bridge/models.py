@@ -11,14 +11,6 @@ from django.utils.translation import gettext as _
 from bitrix24_bridge.mixin import BitrixSyncMixin
 from oscar.core.loading import get_model
 
-ProductAttribute = get_model('catalogue', 'ProductAttribute')  # == ProductProperty
-ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
-
-AttributeOption = get_model('catalogue', 'AttributeOption')
-AttributeOptionGroup = get_model('catalogue', 'AttributeOptionGroup')
-
-#
-
 
 class ProductBX(models.Model, BitrixSyncMixin):
     entity = "crm.product"
@@ -158,9 +150,9 @@ class ProductBX(models.Model, BitrixSyncMixin):
             """
             props: List[ProductPropertyBX] = (
                 ProductPropertyBX.objects
-                                 .prefetch_related('product_attribute')
-                                 .filter(bitrix_id__in=self.properties.keys())
-                                 .all()
+                    .prefetch_related('product_attribute')
+                    .filter(bitrix_id__in=self.properties.keys())
+                    .all()
             )
 
             for prop in props:
@@ -324,17 +316,17 @@ class ProductPropertyBX(models.Model, BitrixSyncMixin):
 
     # f'{PROPERTY_TYPE}_{USER_TYPE}'
     TYPE_MAPS = {
-        "S": ProductAttribute.TEXT,
-        "N": ProductAttribute.INTEGER,
-        "L": ProductAttribute.OPTION,
-        "F": ProductAttribute.FILE,
-        "S_Date": ProductAttribute.DATE,
-        "S_DateTime": ProductAttribute.DATETIME,
+        "S": "text",
+        "N": "integer",
+        "L": "option",
+        "F": "file",
+        "S_Date": "date",
+        "S_DateTime": "datetime",
     }
 
     def get_oscar_type(self, property_type: str, user_type: str) -> str:
         key: str = property_type + (f"_{user_type}" if user_type else "")
-        return self.TYPE_MAPS.get(key, ProductAttribute.TEXT)
+        return self.TYPE_MAPS.get(key, "text")
 
     def get_bitrix_type(self, oscar_type: str) -> Tuple[str, str]:
         """
@@ -353,6 +345,9 @@ class ProductPropertyBX(models.Model, BitrixSyncMixin):
         return result
 
     def to_object(self, force_save: bool = True):
+        AttributeOption = get_model('catalogue', 'AttributeOption')
+        AttributeOptionGroup = get_model('catalogue', 'AttributeOptionGroup')
+        ProductAttribute = get_model('catalogue', 'ProductAttribute')  # == ProductProperty
 
         attribute: ProductAttribute = self.product_attribute or ProductAttribute()
 
@@ -389,7 +384,7 @@ class ProductPropertyBX(models.Model, BitrixSyncMixin):
         return self.product_attribute
 
     @classmethod
-    def from_object(cls, obj: 'ProductAttribute', force_save: bool = True):
+    def from_object(cls, obj, force_save: bool = True):
         """
         Get ProductSectionBX24 from Category
         :param obj:
@@ -405,7 +400,7 @@ class ProductPropertyBX(models.Model, BitrixSyncMixin):
         prop.is_required = "Y" if obj.required else "N"
         prop.property_type, prop.user_type = cls().get_bitrix_type(obj.type)
 
-        if obj.type == ProductAttribute.OPTION:
+        if obj.type == "option":
             options = obj.option_group.options.get_queryset() if obj.option_group else []
 
             prop.values = {
