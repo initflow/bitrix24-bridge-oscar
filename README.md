@@ -31,4 +31,55 @@ Migrate bitrix models
 
 ## HOWTO
 
+### Start queue listener
+
+> python manage.py bitrix_sync_listener
+
+require settings.BB_RABBITMQ_* settings
+
+### Use Sync models
+
+```python
+from bitrix24_bridge.models import *
+
+product = ProductBX()
+
+product.list()
+product.get(bid=13)
+product.update({"id": 13, "fields": {"NAME": "Lupa"}})
+product.remove(bid=13) # not delete() because delete is Model function
+``` 
+
+
+### Connect with oscar models
+
+Every `bridge` models have `Class.from_object(obj)` and `instance.to_object()` methods
+
+```python
+from oscar.apps.catalogue.models import Product
+from bitrix24_bridge.models import *
+
+oscar_product = Product()
+
+product = ProductBX.from_object(oscar_product)
+
+oscar_product = product.to_object()
+```
+
+
+### Convert from and to dict(JSON)
+
+```python
+from oscar.apps.catalogue.models import Product
+from bitrix24_bridge.models import *
+
+product = ProductBX()
+
+data = product.to_dict()
+
+product.update_or_create(data=data)
+
+product = ProductBX.update_or_create_cls(data=data) # raise error if bitrix_id not in data
+
+```
 

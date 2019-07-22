@@ -203,7 +203,7 @@ class BitrixSyncMixin:
 
         return self.send_command(method=method, params=params, action=action, meta=meta)
 
-    def delete(self, bid: int = None, action: Optional[str] = None, meta: Optional[Dict] = None):
+    def remove(self, bid: int = None, action: Optional[str] = None, meta: Optional[Dict] = None):
         method = f"{self.entity}.delete"
 
         params = {
